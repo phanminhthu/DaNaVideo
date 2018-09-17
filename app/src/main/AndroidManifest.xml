@@ -45,6 +45,7 @@
             tools:replace="android:theme" />
 
         <activity
+         android:screenOrientation="landscape"   android:configChanges="orientation|keyboardHidden"
             android:name=".MainActivity_"
             android:windowSoftInputMode="adjustPan" />
         <activity
