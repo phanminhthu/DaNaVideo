@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">DaNa Video</string>
+
+    <string name="facebook_app_id">304709487005020</string>
+    <string name="facebook_schema">fb304709487005020</string>
+
+    <string name="ACCOUNT_KIT_CLIENT_TOKEN">359ef52449e6b610ff726fe09ac649d7</string>
+</resources>
