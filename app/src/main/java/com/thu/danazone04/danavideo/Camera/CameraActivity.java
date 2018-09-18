@@ -23,6 +23,7 @@ import android.media.MediaRecorder;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Build;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -35,9 +36,11 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
+import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -61,6 +64,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 @SuppressLint("Registered")
 @EActivity(R.layout.activity_camera)
@@ -82,14 +86,16 @@ public class CameraActivity extends BaseActivity {
     private static final int REQUEST_CODE = 1000;
     private static final int REQUEST_PERMISSION = 1001;
     private int mScreenDensity;
-    private static final int DISPLAY_WIDTH = 1080;
-    private static final int DISPLAY_HEIGHT = 1920;
+    private static final int DISPLAY_WIDTH = 1920;
+    private static final int DISPLAY_HEIGHT = 1080;
     private MediaProjectionManager mediaProjectionManager;
     private MediaProjection mediaProjection;
     private VirtualDisplay virtualDisplay;
     private MediaProjectionCallBack mediaProjectionCallBack;
     private ImageView toot;
-
+    private Handler mHandler = new Handler();
+    private String filename;
+    private CountDownTimer timer;
 
     @Extra
     String mPhone;
@@ -122,6 +128,8 @@ public class CameraActivity extends BaseActivity {
     TextView mTvWeb;
     @ViewById
     LinearLayout mLnSum;
+    @ViewById
+    TextView mTvRecorder;
 
 
     private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
@@ -187,6 +195,10 @@ public class CameraActivity extends BaseActivity {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void afterView() {
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        filename = String.valueOf(Random());
+        System.out.println("1111111111111111111111111Create");
         mTvAddress.setVisibility(View.VISIBLE);
         mTvName.setMaxLines(1);
         mTvPhone.setMaxLines(1);
@@ -280,7 +292,11 @@ public class CameraActivity extends BaseActivity {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    recoderScreen();
+                    toot.setVisibility(View.GONE);
+                    mTvRecorder.setVisibility(View.VISIBLE);
+                    Toast.makeText(CameraActivity.this, "Nhấn nút âm lượng giẩm để lưu video", Toast.LENGTH_SHORT).show();
+                    //recoderScreen();
+                    countDown();
                 }
 
             }
@@ -294,10 +310,7 @@ public class CameraActivity extends BaseActivity {
         if (requestCode != REQUEST_CODE) {
             return;
         }
-//        if (resultCode != RESULT_OK) {
-//            toot.setChecked(false);
-//            return;
-//        }
+
         mediaProjectionCallBack = new MediaProjectionCallBack();
         mediaProjection = mediaProjectionManager.getMediaProjection(resultCode, data);
         mediaProjection.registerCallback(mediaProjectionCallBack, null);
@@ -306,21 +319,6 @@ public class CameraActivity extends BaseActivity {
 
     }
 
-//    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-//    private void toogleScreen(View v) {
-//        if (((ToggleButton) v).isChecked()) {
-//            try {
-//                initRecoder();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            recoderScreen();
-//        } else {
-//            mediaRecorder.stop();
-//            mediaRecorder.reset();
-//            stotRecoderScreen();
-//        }
-//    }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -355,15 +353,17 @@ public class CameraActivity extends BaseActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private VirtualDisplay createVirtualDisplay() {
-        return mediaProjection.createVirtualDisplay("MainActivity", DISPLAY_WIDTH, DISPLAY_HEIGHT, mScreenDensity,
+        return mediaProjection.createVirtualDisplay("CameraActivity", DISPLAY_WIDTH, DISPLAY_HEIGHT, mScreenDensity,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, mediaRecorder.getSurface(), null, null);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void initRecoder() throws IOException {
         CamcorderProfile cpHigh = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+
         videoUri = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/Camera/")
                 + new StringBuilder("/").append(new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date())).append(".mp4").toString();
         mediaRecorder.setOutputFile(videoUri);
@@ -385,7 +385,6 @@ public class CameraActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         System.out.println("11111111111111111111111111111Resum");
-
 
         startBackgroundThread();
         if (mTextureView.isAvailable()) {
@@ -617,21 +616,46 @@ public class CameraActivity extends BaseActivity {
 
     }
 
+
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        mediaRecorder.stop();
-        mediaRecorder.reset();
-        stotRecoderScreen();
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
+            if(event.getAction() == KeyEvent.ACTION_DOWN){
+                if (virtualDisplay != null) {
+                    mediaRecorder.stop();
+                    mediaRecorder.reset();
+                    stotRecoderScreen();
+                }
+
+                return true;
+            }
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
-//    @RequiresApi(api = Build.VERSION_CODES.N)
-//    @Override
-//    protected void onStop() {
-//        super.onStop();
-//        System.out.println("1111111111111111111111111Stop");
-////            mediaRecorder.resume();
-//
-//    }
+    public int Random() {
+        //tong tu 10 den 19
+        Random rand = new Random();
+        int num = rand.nextInt(1000000000);
+        return num;
+    }
+
+    private void countDown(){
+       timer = new CountDownTimer(7000, 1000) {
+           @Override
+           public void onTick(long millisUntilFinished) {
+                mTvRecorder.setText("" + millisUntilFinished / 1000);
+           }
+
+           @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+           @Override
+           public void onFinish() {
+               mTvRecorder.setVisibility(View.GONE);
+               timer.cancel();
+
+               recoderScreen();
+           }
+       }.start();
+    }
 }

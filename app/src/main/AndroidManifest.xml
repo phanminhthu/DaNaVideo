@@ -45,6 +45,7 @@
             tools:replace="android:theme" />
 
         <activity
+            android:screenOrientation="portrait"
             android:name=".MainActivity_"
             android:windowSoftInputMode="adjustPan" />
         <activity
@@ -53,7 +54,10 @@
         <activity
             android:name=".register.RegisterActivity_"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".Camera.CameraActivity_" />
+        <activity android:name=".Camera.CameraActivity_"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboardHidden"
+            />
         <activity android:name=".splash.SplashActivity_">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

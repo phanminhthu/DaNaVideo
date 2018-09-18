@@ -1,10 +1,15 @@
 package com.thu.danazone04.danavideo;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.thu.danazone04.danavideo.Camera.CameraActivity;
 import com.thu.danazone04.danavideo.Camera.CameraActivity_;
@@ -42,11 +47,13 @@ public class MainActivity extends BaseActivity {
     EditText mEdtWeb;
     @ViewById
     CheckBox mCbWeb;
+
     private String names, phones, addresss, prices, products, webs;
 
 
     @Override
     protected void afterView() {
+        checkPermissions();
         checkinCheckBox();
         setData();
     }
@@ -103,6 +110,16 @@ public class MainActivity extends BaseActivity {
     @Click(R.id.mTvSubmit)
     void onClick(View v) {
         getData();
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+            showAlertDialog("Cho phép các quyền truy cập để tiếp tục sử dụng dịch vụ!");
+            return;
+        }
+
         CameraActivity_.intent(MainActivity.this)
                 .mName(names)
                 .mPhone(phones)
@@ -204,4 +221,27 @@ public class MainActivity extends BaseActivity {
             webs = webbb;
         }
     }
+
+    private void checkPermissions() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        == PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                == PackageManager.PERMISSION_GRANTED
+                ) {
+            // getData();
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
+                }
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, 101);
+            }
+        }
+    }
+
+
+
 }
