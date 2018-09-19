@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:gravity="center"
-            android:text="DaNa Photo"
+            android:text="DaNa Video"
             android:textColor="@color/colorWhite"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -34,13 +34,15 @@
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:orientation="vertical">
+
             <TextView
-                android:layout_marginRight="@dimen/_5sdp"
-                android:layout_marginLeft="@dimen/_5sdp"
-                android:textColor="@color/black"
-                android:text="Chú ý: Click vào Checkbox bên phải để lưu trạng thái dữ liệu. Nhấn bỏ check để hủy bỏ trạng thái."
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/_5sdp"
+                android:layout_marginRight="@dimen/_5sdp"
+                android:text="Chú ý: Click vào Checkbox bên phải để lưu trạng thái dữ liệu. Nhấn bỏ check để hủy bỏ trạng thái."
+                android:textColor="@color/black" />
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -149,9 +151,9 @@
                     android:layout_marginRight="@dimen/_10sdp"
                     android:background="@drawable/bg_edittext"
                     android:hint="Địa chỉ"
+                    android:imeOptions="actionNext"
                     android:maxLines="1"
                     android:singleLine="true"
-                    android:imeOptions="actionNext"
                     android:textColor="@color/colorWhite"
                     android:textColorHint="@color/colorWhite"
                     android:textSize="@dimen/_11sdp" />
@@ -180,9 +182,9 @@
                     android:layout_marginRight="@dimen/_10sdp"
                     android:background="@drawable/bg_edittext"
                     android:hint="Giá sản phẩm"
+                    android:imeOptions="actionNext"
                     android:maxLines="1"
                     android:singleLine="true"
-                    android:imeOptions="actionNext"
                     android:textColor="@color/colorWhite"
                     android:textColorHint="@color/colorWhite"
                     android:textSize="@dimen/_11sdp" />
@@ -211,9 +213,9 @@
                     android:layout_marginRight="@dimen/_10sdp"
                     android:background="@drawable/bg_edittext"
                     android:hint="Địa chỉ website"
+                    android:imeOptions="actionDone"
                     android:maxLines="1"
                     android:singleLine="true"
-                    android:imeOptions="actionDone"
                     android:textColor="@color/colorWhite"
                     android:textColorHint="@color/colorWhite"
                     android:textSize="@dimen/_11sdp" />
@@ -229,18 +231,18 @@
             </RelativeLayout>
 
 
-                <TextView
-                    android:layout_gravity="center_horizontal"
-                    android:drawableTop="@drawable/ic_camera"
-                    android:id="@+id/mTvSubmit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/_5sdp"
-                    android:layout_marginTop="@dimen/_30sdp"
-                    android:background="@drawable/bg_text_share_fanpage"
-                    android:text="Camera"
-                    android:textColor="@color/colorWhite"
-                    android:textSize="@dimen/_10sdp" />
+            <TextView
+                android:id="@+id/mTvSubmit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/_5sdp"
+                android:layout_marginTop="@dimen/_30sdp"
+                android:background="@drawable/bg_text_share_fanpage"
+                android:drawableTop="@drawable/ic_camera"
+                android:text="Camera"
+                android:textColor="@color/colorWhite"
+                android:textSize="@dimen/_10sdp" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
