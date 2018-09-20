@@ -2,17 +2,20 @@ package com.dana.danazone04.danavideo;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dana.danazone04.danavideo.Camera.CameraActivity;
 import com.dana.danazone04.danavideo.Camera.CameraActivity_;
+import com.dana.danazone04.danavideo.video.PlayVideoActivity_;
 
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
@@ -21,6 +24,8 @@ import org.androidannotations.annotations.ViewById;
 @SuppressLint("Registered")
 @EActivity(R.layout.activity_main)
 public class MainActivity extends BaseActivity {
+    public static final int PLAY_VIDEO = 100;
+
     @ViewById
     TextView mTvSubmit;
     @ViewById
@@ -47,13 +52,19 @@ public class MainActivity extends BaseActivity {
     EditText mEdtWeb;
     @ViewById
     CheckBox mCbWeb;
+    @ViewById
+    TextView mTvPlay;
+    @ViewById
+    LinearLayout mLnSum;
 
     private String names, phones, addresss, prices, products, webs;
+    private String url;
 
 
     @Override
     protected void afterView() {
         checkPermissions();
+        mLnSum.setWeightSum(6);
         checkinCheckBox();
         setData();
     }
@@ -107,54 +118,75 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    @Click(R.id.mTvSubmit)
+    @Click({R.id.mTvSubmit, R.id.mTvPlay})
     void onClick(View v) {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-                != PackageManager.PERMISSION_GRANTED) {
-            showAlertDialog("Cho phép các quyền truy cập để tiếp tục sử dụng dịch vụ!");
-            return;
-        }
-        getData();
-        if (mCbProduct.isChecked() && mEdtProduct.getText().toString().equals("")) {
-            showAlertDialog("Vui lòng nhập tên sản phẩm");
-            return;
+        switch (v.getId()) {
+            case R.id.mTvPlay:
+                if (url != null) {
+                    PlayVideoActivity_.intent(MainActivity.this).mUrl(url).start();
+                }
+                break;
+
+            case R.id.mTvSubmit:
+                if (ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED &&
+                        ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                                != PackageManager.PERMISSION_GRANTED
+                        && ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    showAlertDialog("Cho phép các quyền truy cập để tiếp tục sử dụng dịch vụ!");
+                    return;
+                }
+                getData();
+                if (mCbProduct.isChecked() && mEdtProduct.getText().toString().equals("")) {
+                    showAlertDialog("Vui lòng nhập tên sản phẩm");
+                    return;
+                }
+
+                if (mCbName.isChecked() && mEdtName.getText().toString().equals("")) {
+                    showAlertDialog("Vui lòng nhập tên nhân viên");
+                    return;
+                }
+                if (mCbPhone.isChecked() && mEdtPhone.getText().toString().equals("")) {
+                    showAlertDialog("Vui lòng nhập số điện thoại");
+                    return;
+                }
+
+                if (mCbAddress.isChecked() && mTvAddress.getText().toString().equals("")) {
+                    showAlertDialog("Vui lòng nhập địa chỉ");
+                    return;
+                }
+
+                if (mCbMoney.isChecked() && mEdtMoney.getText().toString().equals("")) {
+                    showAlertDialog("Vui lòng nhập giá tiền");
+                    return;
+                }
+                if (mCbWeb.isChecked() && mEdtWeb.getText().toString().equals("")) {
+                    showAlertDialog("Vui lòng nhập địa chỉ website");
+                    return;
+                }
+
+                CameraActivity_.intent(MainActivity.this)
+                        .mName(names)
+                        .mPhone(phones)
+                        .mAddress(addresss)
+                        .mProduct(products)
+                        .mPrice(prices)
+                        .mWeb(webs)
+                        .startForResult(PLAY_VIDEO);
+                break;
         }
 
-        if (mCbName.isChecked() && mEdtName.getText().toString().equals("")) {
-            showAlertDialog("Vui lòng nhập tên nhân viên");
-            return;
-        }
-        if (mCbPhone.isChecked() && mEdtPhone.getText().toString().equals("")) {
-            showAlertDialog("Vui lòng nhập số điện thoại");
-            return;
-        }
+    }
 
-        if (mCbAddress.isChecked() && mTvAddress.getText().toString().equals("")) {
-            showAlertDialog("Vui lòng nhập địa chỉ");
-            return;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PLAY_VIDEO) {
+            mLnSum.setWeightSum(2);
+            mTvPlay.setVisibility(View.VISIBLE);
+            url = data.getStringExtra("video");
         }
-
-        if (mCbMoney.isChecked() && mEdtMoney.getText().toString().equals("")) {
-            showAlertDialog("Vui lòng nhập giá tiền");
-            return;
-        }
-        if (mCbWeb.isChecked() && mEdtWeb.getText().toString().equals("")) {
-            showAlertDialog("Vui lòng nhập địa chỉ website");
-            return;
-        }
-
-        CameraActivity_.intent(MainActivity.this)
-                .mName(names)
-                .mPhone(phones)
-                .mAddress(addresss)
-                .mProduct(products)
-                .mPrice(prices)
-                .mWeb(webs)
-                .start();
     }
 
     private void getData() {

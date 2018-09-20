@@ -230,19 +230,49 @@
                     android:textColor="@color/black" />
             </RelativeLayout>
 
-
-            <TextView
-                android:id="@+id/mTvSubmit"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:paddingRight="@dimen/_30sdp"
+                android:paddingLeft="@dimen/_30sdp"
+                android:gravity="center_horizontal"
+                android:id="@+id/mLnSum"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="@dimen/_5sdp"
-                android:layout_marginTop="@dimen/_30sdp"
-                android:background="@drawable/bg_text_share_fanpage"
-                android:drawableTop="@drawable/ic_camera"
-                android:text="Camera"
-                android:textColor="@color/colorWhite"
-                android:textSize="@dimen/_10sdp" />
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <TextView
+                    android:id="@+id/mTvSubmit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/_5sdp"
+                    android:layout_marginRight="@dimen/_10sdp"
+                    android:layout_marginTop="@dimen/_20sdp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_text_share_fanpage"
+                    android:drawableTop="@drawable/ic_camera"
+                    android:gravity="center"
+                    android:text="Camera"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="@dimen/_10sdp" />
+
+                <TextView
+                    android:visibility="gone"
+                    android:id="@+id/mTvPlay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/_5sdp"
+                    android:layout_marginLeft="@dimen/_25sdp"
+                    android:layout_marginTop="@dimen/_20sdp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_text_share_fanpage"
+                    android:drawableTop="@drawable/play_circle_outline"
+                    android:gravity="center"
+                    android:text="Xem video"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="@dimen/_10sdp"
+                    />
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

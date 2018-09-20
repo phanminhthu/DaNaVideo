@@ -51,6 +51,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dana.danazone04.danavideo.BaseActivity;
+import com.dana.danazone04.danavideo.MainActivity;
 import com.dana.danazone04.danavideo.R;
 
 import org.androidannotations.annotations.EActivity;
@@ -316,6 +317,9 @@ public class CameraActivity extends BaseActivity {
         virtualDisplay.release();
         destroyMediaProjection();
         Toast.makeText(CameraActivity.this, "Lưu video thành công!", Toast.LENGTH_LONG).show();
+        Intent intent = new Intent();
+        intent.putExtra("video", videoUri);
+        setResult(MainActivity.PLAY_VIDEO, intent);
         finish();
     }
 
