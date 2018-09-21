@@ -20,10 +20,14 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.CamcorderProfile;
+import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Handler;
@@ -318,7 +322,9 @@ public class CameraActivity extends BaseActivity {
         destroyMediaProjection();
         Toast.makeText(CameraActivity.this, "Lưu video thành công!", Toast.LENGTH_LONG).show();
         Intent intent = new Intent();
-        intent.putExtra("video", videoUri);
+        Bundle bundle = new Bundle();
+        bundle.putString("video", videoUri);
+        intent.putExtras(bundle);
         setResult(MainActivity.PLAY_VIDEO, intent);
         finish();
     }
@@ -369,6 +375,7 @@ public class CameraActivity extends BaseActivity {
 
         ContentValues values = new ContentValues();
         values.put(MediaStore.Video.Media.DATA, videoUri);
+
         ContentResolver resolver = CameraActivity.this.getContentResolver();
         resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
 

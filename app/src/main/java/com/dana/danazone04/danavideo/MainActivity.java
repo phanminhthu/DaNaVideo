@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.CheckBox;
@@ -19,6 +20,7 @@ import com.dana.danazone04.danavideo.video.PlayVideoActivity_;
 
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.OnActivityResult;
 import org.androidannotations.annotations.ViewById;
 
 @SuppressLint("Registered")
@@ -179,13 +181,13 @@ public class MainActivity extends BaseActivity {
 
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PLAY_VIDEO) {
+    @OnActivityResult(PLAY_VIDEO)
+    void onRequestVideo(Intent intent){
+        if (intent !=null){
             mLnSum.setWeightSum(2);
             mTvPlay.setVisibility(View.VISIBLE);
-            url = data.getStringExtra("video");
+            Bundle bundle = intent.getExtras();
+            url = bundle.getString("video");
         }
     }
 
