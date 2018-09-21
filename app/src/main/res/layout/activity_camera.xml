@@ -152,4 +152,5 @@
         android:textColor="@color/colorWhite"
         android:textSize="@dimen/_18sdp"
         android:textStyle="bold" />
+
 </RelativeLayout>

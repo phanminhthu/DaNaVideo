@@ -7,6 +7,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
@@ -23,6 +24,7 @@ import android.media.CamcorderProfile;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.media.MediaScannerConnection;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
@@ -32,6 +34,7 @@ import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
@@ -47,6 +50,7 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Chronometer;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -62,6 +66,7 @@ import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.ViewById;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -134,6 +139,7 @@ public class CameraActivity extends BaseActivity {
     LinearLayout mLnSum;
     @ViewById
     TextView mTvRecorder;
+    private File mVideoFolder;
 
     private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -169,6 +175,16 @@ public class CameraActivity extends BaseActivity {
         ORIENTATIONS.append(Surface.ROTATION_270, 270);
     }
 
+
+    private long lStartTime;
+    private long duration;
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            duration = SystemClock.uptimeMillis() - lStartTime;
+            mHandler.postDelayed(this, 0);
+        }
+    };
     private CameraDevice.StateCallback mCameraDeviceStateCallback = new CameraDevice.StateCallback() {
         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         @Override
@@ -198,6 +214,7 @@ public class CameraActivity extends BaseActivity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        createVideoFolder();
         mTvAddress.setVisibility(View.VISIBLE);
         mTvName.setMaxLines(1);
         mTvPhone.setMaxLines(1);
@@ -285,7 +302,9 @@ public class CameraActivity extends BaseActivity {
                 } else {
                     // toogleScreen(v);
                     try {
+                        createVideoFileName();
                         initRecoder();
+
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -316,10 +335,20 @@ public class CameraActivity extends BaseActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void stotRecoderScreen() {
+        mHandler.removeCallbacks(runnable);
         if (virtualDisplay == null)
             return;
         virtualDisplay.release();
         destroyMediaProjection();
+
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Video.Media.DATA, videoUri);
+        values.put(MediaStore.Video.VideoColumns.DURATION, (duration - 1300));
+        values.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
+        ContentResolver resolver = CameraActivity.this.getContentResolver();
+        resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
+
+
         Toast.makeText(CameraActivity.this, "Lưu video thành công!", Toast.LENGTH_LONG).show();
         Intent intent = new Intent();
         Bundle bundle = new Bundle();
@@ -342,9 +371,12 @@ public class CameraActivity extends BaseActivity {
     private void recoderScreen() {
         if (mediaProjection == null) {
             startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(), REQUEST_CODE);
+            lStartTime = SystemClock.uptimeMillis();
+            mHandler.postDelayed(runnable, 0);
             return;
         }
         virtualDisplay = createVirtualDisplay();
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -360,28 +392,40 @@ public class CameraActivity extends BaseActivity {
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 
-        videoUri = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/Camera/")
-                + new StringBuilder("/").append(new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date())).append(".mp4").toString();
+        // videoUri = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/Camera/")
+        //   + new StringBuilder("/").append(new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date())).append(".mp4").toString();
 
         mediaRecorder.setOutputFile(videoUri);
         mediaRecorder.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT);
         mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
         mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
         mediaRecorder.setVideoEncodingBitRate(cpHigh.videoBitRate);
         mediaRecorder.setVideoFrameRate(cpHigh.videoFrameRate);
         int roatation = getWindowManager().getDefaultDisplay().getRotation();
         int orientation = ORIENTATIONS.get(roatation * 90);
         mediaRecorder.setOrientationHint(orientation);
 
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Video.Media.DATA, videoUri);
-
-        ContentResolver resolver = CameraActivity.this.getContentResolver();
-        resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
 
         mediaRecorder.prepare();
-
     }
+
+    private void createVideoFolder() {
+        File movieFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+        mVideoFolder = new File(movieFile, "thu_camera");
+        if (!mVideoFolder.exists()) {
+            mVideoFolder.mkdirs();
+        }
+    }
+
+    private File createVideoFileName() throws IOException {
+        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String prepend = "VIDEO_" + timestamp + "_";
+        File videoFile = File.createTempFile(prepend, ".mp4", mVideoFolder);
+        videoUri = videoFile.getAbsolutePath();
+        return videoFile;
+    }
+
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -499,10 +543,13 @@ public class CameraActivity extends BaseActivity {
             case REQUEST_PERMISSION: {
                 if ((grantResults.length > 0) && (grantResults[0] + grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
                     try {
+                        createVideoFileName();
                         initRecoder();
+
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+
                     recoderScreen();
                 } else {
                     Snackbar.make(root, "Permissons", Snackbar.LENGTH_INDEFINITE)
@@ -613,6 +660,7 @@ public class CameraActivity extends BaseActivity {
         if (virtualDisplay != null) {
             mediaRecorder.stop();
             mediaRecorder.reset();
+            mHandler.removeCallbacks(runnable);
             finish();
         }
     }
